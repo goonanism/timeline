@@ -1,61 +1,56 @@
-<form action="/add/" method="post">
-	<label for="name">Name:</label><br />
-	<input type="text" name="name" /><br />
+{% extends "base.html" %}
+{% block content %}
+	<form action="/add/" method="post">
+		<label for="name">Name:</label><br />
+		<input type="text" name="name" /><br />
 	
-	<label for="note">Note:</label><br />
-	<input type="text" name="note" /><br />
+		<label for="note">Note:</label><br />
+		<input type="text" name="note" /><br />
 
-	<label for="link">Link:</label><br />
-	<input type="text" name="link" /><br />
+		<label for="link">Link:</label><br />
+		<input type="text" name="link" /><br />
 
-	<label for="milestone">Milestone?:</label><br />
-	<input type="checkbox" name="milestone" /><br />
+		<label for="milestone">Milestone?:</label><br />
+		<input type="checkbox" name="milestone" /><br />
 	
-	<fieldset>
-		<legend>From or on:</legend>
-		<label for="year">Year:</label><br />
-		<select name="year">
-			{% for year in range(0,2017) %}
-				<option value="{{ year }}">{{ year }}</option>
-			{% endfor %}
-		</select><br />
-	
-		<label for="month">Month:</label><br />
-		<select name="month">
-			{% for month in range(0,13) %}
-				<option value="{{ month }}">{{ month }}</option>
-			{% endfor %}
-		</select><br />
-	
-		<label for="day">Day:</label><br />
-		<select name="day">
-			{% for day in range(0,32) %}
-				<option value="{{ day }}">{{ day }}</option>
-			{% endfor %}
-		</select><br />
-	</fieldset>
-	<fieldset>
-		<legend>To:</legend>
-		<label for="year">Year:</label><br />
-		<select name="year">
-			{% for year in range(0,2017) %}
-				<option value="{{ year }}">{{ year }}</option>
-			{% endfor %}
-		</select><br />
-	
-		<label for="month">Month:</label><br />
-		<select name="month">
-			{% for month in range(0,13) %}
-				<option value="{{ month }}">{{ month }}</option>
-			{% endfor %}
-		</select><br />
-	
-		<label for="day">Day:</label><br />
-		<select name="day">
-			{% for day in range(0,32) %}
-				<option value="{{ day }}">{{ day }}</option>
-			{% endfor %}
-		</select><br />
-	</fieldset>
-	<input type="submit" />
-</form>
+		<fieldset>
+			<legend>From or on:</legend>
+			<select name="date_from[year]">
+				{% for year in range(0,2017) %}
+					<option value="{{ year }}">{{ year }}</option>
+				{% endfor %}
+			</select> - 
+			<select name="date_from[month]">
+				{% for month in range(0,13) %}
+					<option value="{{ month }}">{{ month }}</option>
+				{% endfor %}
+			</select> -
+			<select name="date_from[day]">
+				{% for day in range(0,32) %}
+					<option value="{{ day }}">{{ day }}</option>
+				{% endfor %}
+			</select><br />
+		</fieldset>
+		<fieldset>
+			<legend>To:</legend>
+			<select name="date_to[year]">
+				{% for year in range(0,2017) %}
+					<option value="{{ year }}">{{ year }}</option>
+				{% endfor %}
+			</select> - 
+			<select name="date_to[month]">
+				{% for month in range(0,13) %}
+					<option value="{{ month }}">{{ month }}</option>
+				{% endfor %}
+			</select> -
+			<select name="date_to[day]">
+				{% for day in range(0,32) %}
+					<option value="{{ day }}">{{ day }}</option>
+				{% endfor %}
+			</select>
+		</fieldset><br />
+		<label for="tag">Tag:</label><br />
+		<input type="text" name="tag" /><button class="add_tag">add</button><br />
+		<input type="submit" />
+	</form>
+{% endblock %}
