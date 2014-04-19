@@ -85,6 +85,12 @@ def add_event():
 	else:
 		return render_template('add.html')
 
+def get_event_tags(event_id):
+	db = get_db()
+	cur = db.execute('select * from tag join event_tag on event_tag.tag_id = tag.id where event_tag.event_id = ' + event_id)
+	return cur.fetchall()
+	
+
 @app.route("/tags/")
 def get_tags():
 	db = get_db()
