@@ -3,12 +3,14 @@
 		var selected_tags = new Array()
 		
 		// get tags for event
-		$.get('/events/view/' + $('input[name=id]').val(), function(data){
-			$(data.tags).each(function(){
-				selected_tags.push(this);
-				updateSelectedTags(selected_tags);
+		if(location.pathname.indexOf('/events/edit') > 0){
+			$.get('/events/view/' + $('input[name=id]').val(), function(data){
+				$(data.tags).each(function(){
+					selected_tags.push(this);
+					updateSelectedTags(selected_tags);
+				});
 			});
-		});
+		}
 		
 		// add tag to event
 		
