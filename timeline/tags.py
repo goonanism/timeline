@@ -1,7 +1,7 @@
 #!/usr/bin/python
 from flask import request, render_template, jsonify, g
 from timeline import app
-import timeline.database as dbase
+import database
 
 @app.route("/tags/")
 def get_tags():
@@ -17,7 +17,7 @@ def get_tags():
 	for event in events:
 		json_list['tags'].append(dbase.dict_row(event))
 	return jsonify(json_list)
-	
+
 @app.route("/tags/view/<int:tag_id>")
 def get_tag():
 	#################################################
@@ -34,16 +34,16 @@ def add_tags():
 		db = dbase.get_db()
 
 		# check if tag exists. If it does, return all details
-		
+
 		cur = db.execute("SELECT * FROM tag WHERE reference = '" + reference + "'")
 		tag_exists = cur.fetchone();
 		if tag_exists:
 			return jsonify(tag_exists)
-	
+
 		# Otherwise create new tag
 		db.execute('insert into tag (name, reference) values(?, ?)', [request.json['tag'], reference])
 		db.commit()
-		
+
 		# Then get new tag details and return it
 		cur = db.execute("SELECT * FROM tag WHERE reference = '" + reference + "'")
 		return jsonify(cur.fetchone())
