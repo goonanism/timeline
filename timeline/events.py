@@ -27,6 +27,8 @@ class Event():
 
 	def save(self, data):
 		'''
+			@todo - data validation and exception handling
+
 			a dictionary with a key of Event and a list of values to be saved. If 'id' is included it will update, otherwise a new entry will be create.
 
 			Optionally, you can also have a Tag key with a list of tag IDs to be saved to the event.
@@ -35,25 +37,30 @@ class Event():
 				{ 'Event' : { 'name' : 'World War I' }, 'Tag' : [ 4, 7, 82 ] }
 		'''
 		fields = []
-		values = []
+		values_to_save = []
 		question_marks = []
 		# @todo:
-		saved_id = ''
-		for field, values in data.Event.iteritems():
+		saved_id = False
+		for field, values in data['Event'].iteritems():
 			if field is not 'id':
 				fields.append(field)
-				values.append(values)
+				values_to_save.append(values)
 				question_marks.append('?')
-		if 'id' in data.Event:
-			fields.append(data.Event['id'])
-			self.db.execute('UPDATE event SET ' + ', '.join(fields) + ' VALUES( ' + ', '.join(question_marks) + ' ) WHERE id = ?', values)
+		if 'id' in data['Event']:
+			saved_id = data['Event']['id']
+			values_to_save.append(data['Event']['id'])
+			self.db.execute('UPDATE event SET ' + ', '.join(fields) + ' VALUES( ' + ', '.join(question_marks) + ' ) WHERE id = ?', values_to_save)
 		else:
-			self.db.execute('INSERT INTO event (' + ', '.join(fields) + ') VALUES( ' + ', '.join(question_marks) + ' )', values)
-		if 'Tag' in event:
+			cursor = self.db.execute('INSERT INTO event (' + ', '.join(fields) + ') VALUES( ' + ', '.join(question_marks) + ' )', values_to_save)
+			saved_id = cursor.lastrowid
+		if 'Tag' in data and data['Tag']:
 			self.db.execute('DELETE FROM event_tag WHERE event_id = ?', str(values['id']))
-			self.db.commit()
-			self.db.execute('INSERT INTO event_tag (event_id, tag_id) VALUES ' + ', '.join(even.Tag))
-			self.db.commit()
+			tag_values = []
+			# create a list of values to pass to
+			for tag in event.Tag:
+				tag_values.append('(' + saved_id + ', ' + tag + ')')
+
+			self.db.execute('INSERT INTO event_tag (event_id, tag_id) VALUES ' + ', '.join(tag_values))
 
 	def delete(self, event_id):
 		pass
@@ -126,25 +133,23 @@ def event_update():
 @app.route("/events/add/", methods=['GET', 'POST'])
 def event_add():
 	if request.method == 'POST':
-		data = {'event' : {}, 'tags' : []}
+		data = {'Event' : {}, 'Tags' : []}
 		for field in request.json:
 			if 'tags' in field:
-				data['tags'].append(field)
+				data['Tags'].append(field)
 			else:
-				data['event'][field['name']] = field['value']
-		print data
-		date_from = data['event']['date_from[year]'] + '-' + data['event']['date_from[month]'] + '-' + data['event']['date_from[day]']
-		date_to = data['event']['date_to[year]'] + '-' + data['event']['date_to[month]'] + '-' + data['event']['date_to[day]']
-		db = database.get_db()
-		db.execute('insert into event (name, note, link, date_from, date_to) values(?, ?, ?, ?, ?)', [data['event']['name'], data['event']['note'], data['event']['link'], date_from, date_to])
-		db.commit()
-
-		# last_insert_rowid()
-
-		##################################
-		# get last inserted and add tags #
-		##################################
-
+				data['Event'][field['name']] = field['value']
+		data['Event']['date_from'] = data['Event']['date_from[year]'] + '-' + data['Event']['date_from[month]'] + '-' + data['Event']['date_from[day]']
+		data['Event']['date_to'] = data['Event']['date_to[year]'] + '-' + data['Event']['date_to[month]'] + '-' + data['Event']['date_to[day]']
+		data['Event'].pop('date_from[year]')
+		data['Event'].pop('date_from[month]')
+		data['Event'].pop('date_from[day]')
+		data['Event'].pop('date_to[year]')
+		data['Event'].pop('date_to[month]')
+		data['Event'].pop('date_to[day]')
+		data['Event'].pop('tag')
+		event = Event()
+		event.save(data)
 		return jsonify(data)
 	else:
 		return render_template('add.html')
