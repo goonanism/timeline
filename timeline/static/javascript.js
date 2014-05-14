@@ -1,7 +1,7 @@
 (function($){
 	$(document).ready(function(){
 		var selected_tags = new Array()
-		
+
 		// get tags for event
 		var pathname = location.pathname;
 		if(pathname.indexOf('/events/edit') > -1){
@@ -12,9 +12,9 @@
 				updateSelectedTags(selected_tags);
 			});
 		}
-		
+
 		// add tag to event
-		
+
 		$('.add_tag').click(function(e){
 			e.preventDefault()
 			tag_data = {tag : $('input[name=tag]').val()};
@@ -33,7 +33,7 @@
 				dataType: "json"
 			});
 		});
-		
+
 		// tag auto complete
 		$.get('/tags/', function(data){
 			var tags = new Array()
@@ -50,9 +50,9 @@
 				}
 			});
 		});
-		
+
 		// add / edit event
-		
+
 		$('.edit-event').submit(function(e){
 			e.preventDefault();
 			var form_json = $(this).serializeArray();
@@ -64,9 +64,9 @@
 				data: JSON.stringify(form_json),
 				dataType: "json"
 			});
-			location.reload();
+		//	location.reload();
 		});
-		
+
 		$('.add-event').submit(function(e){
 			e.preventDefault();
 			var form_json = $(this).serializeArray();
@@ -80,8 +80,8 @@
 			});
 //			location.reload();
 		});
-		
-		
+
+
 		function updateSelectedTags(selected_tags){
 			$('ul.tags').empty();
 			$(selected_tags).each(function(){
@@ -99,6 +99,6 @@
 			})
 			updateSelectedTags(selected_tags);
 		}
-		
+
 	});
 })(jQuery);

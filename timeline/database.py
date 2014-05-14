@@ -26,6 +26,8 @@ class Database:
         if variables:
             return self.db.execute(query, variables)
         return self.db.execute(query)
+    def commit(self):
+        return self.db.commit()
 
     @app.teardown_appcontext
     def close_db(error):

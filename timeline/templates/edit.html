@@ -2,10 +2,10 @@
 {% block content %}
 	<form action="/add/" method="post" class="edit-event">
 		<input type="hidden" name="id" value="{{ event.event.id }}" />
-		
+
 		<label for="name">Name:</label><br />
 		<input type="text" name="name" value="{{ event.event.name }}" /><br />
-	
+
 		<label for="note">Note:</label><br />
 		<input type="text" name="note" value="{{ event.event.note }}" /><br />
 
@@ -14,45 +14,15 @@
 
 		<label for="milestone">Milestone?:</label><br />
 		<input type="checkbox" name="milestone" value="{{ event.event.milestone }}" /><br />
-	
-		<fieldset>
-			<legend>From or on:</legend>
-			<select name="date_from[year]">
-				{% for year in range(1,2017) %}
-					<option value="{{ year }}"{% if year == event.event.date_from.year %} selected{% endif %}>{{ year }}</option>
-				{% endfor %}
-			</select> - 
-			<select name="date_from[month]">
-				{% for month in range(1,13) %}
-					<option value="{{ month }}"{% if month == event.event.date_from.month %} selected{% endif %}>{{ month }}</option>
-				{% endfor %}
-			</select> -
-			<select name="date_from[day]">
-				{% for day in range(1,32) %}
-					<option value="{{ day }}"{% if day == event.event.date_from.day %} selected{% endif %}>{{ day }}</option>
-				{% endfor %}
-			</select><br />
-		</fieldset>
-		<fieldset>
-			<legend>To:</legend>
-			<select name="date_to[year]">
-				{% for year in range(1,2017) %}
-					<option value="{{ year }}"{% if year == event.event.date_to.year %} selected{% endif %}>{{ year }}</option>
-				{% endfor %}
-			</select> - 
-			<select name="date_to[month]">
-				{% for month in range(1,13) %}
-					<option value="{{ month }}"{% if month == event.event.date_to.month %} selected{% endif %}>{{ month }}</option>
-				{% endfor %}
-			</select> -
-			<select name="date_to[day]">
-				{% for day in range(1,32) %}
-					<option value="{{ day }}"{% if day == event.event.date_to.day %} selected{% endif %}>{{ day }}</option>
-				{% endfor %}
-			</select>
-		</fieldset><br />
+
+		<label for="date_from">Date (From):</label> <small>yyyy-mm-dd</small><br />
+		<input type="text" name="date_from" value="{{ event.event.date_from }}" /><br />
+
+		<label for="date_to">Date To:</label> <small>yyyy-mm-dd</small><br />
+		<input type="text" name="date_to" value="{{ event.event.date_to }}" /><br />
+
 		<label for="tag">Tag:</label><br />
-		<input type="text" name="tag" class="tag-autocomplete" /><button class="add_tag">add</button><br />
+		<input type="text" class="tag-autocomplete" /><button class="add_tag">add</button><br />
 		<ul class="tags"></ul>
 		<input type="submit" />
 	</form>
