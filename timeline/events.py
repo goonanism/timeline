@@ -82,7 +82,8 @@ def events():
 
 @app.route("/events/view/<int:event_id>")
 def event_view(event_id):
-	return jsonify(get_event(event_id))
+	event = Event()
+	return jsonify(event.get(event_id))
 
 @app.route("/events/edit/<int:event_id>")
 def even_edit(event_id):
