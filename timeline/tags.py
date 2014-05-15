@@ -1,31 +1,49 @@
 #!/usr/bin/python
+
 from flask import request, render_template, jsonify, g
 from timeline import app
-import database
+from database import Database
+
+
+class Tag():
+	def __init__(self):
+		self.db = Database()
+	def get(self, tag_id):
+		results = { 'Tags' : {}, 'Events' : [] }
+		tag = self.db.execute('SELECT * FROM tag WHERE id = ?', [tag_id])
+		results['Tags'] = self.db.dict_row(tag.fetchone())
+		events = self.db.execute('SELECT * FROM event JOIN event_tag ON event.id = event_tag.event_id WHERE event_tag.tag_id = ?', [tag_id])
+		for event in events:
+			results['Events'].append(self.db.dict_row(event))
+		return results
+
+	def get_all(self):
+		tags = self.db.execute('SELECT id FROM tag')
+		results = {'Tags' : []}
+		for tag in tags.fetchall():
+			print self.get(tag[0])
+			results['Tags'].append(self.get(tag[0]))
+		return results
+
+	def save(self, data):
+		pass
+	def delete(self, tag_id):
+		pass
+
+
+
 
 @app.route("/tags/")
 def get_tags():
-	#################################
-	#								#
-	#		Add Event Data			#
-	#								#
-	#################################
-	db = dbase.get_db()
-	cur = db.execute('SELECT * FROM tag')
-	json_list = {'tags' : []}
-	events = cur.fetchall()
-	for event in events:
-		json_list['tags'].append(dbase.dict_row(event))
-	return jsonify(json_list)
+
+	# @todo: event data
+	tags = Tag()
+	return jsonify(tags.get_all())
 
 @app.route("/tags/view/<int:tag_id>")
-def get_tag():
-	#################################################
-	#												#
-	#		Individual tag with Event Data			#
-	#												#
-	#################################################
-	pass
+def get_tag(tag_id):
+	tags = Tag()
+	return jsonify(tags.get(tag_id))
 
 @app.route("/tags/add/", methods=['GET', 'POST'])
 def add_tags():

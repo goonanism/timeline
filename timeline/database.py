@@ -23,6 +23,7 @@ class Database:
     	return g.sqlite_db
 
     def execute(self, query, variables = None):
+        ''' Requires query string followed by optional list or variables '''
         if variables:
             return self.db.execute(query, variables)
         return self.db.execute(query)
