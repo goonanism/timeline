@@ -34,7 +34,6 @@ class Event():
 			ie:
 				{ 'Event' : { 'name' : 'World War I' }, 'Tag' : [ 4, 7, 82 ] }
 		'''
-
 		# values for query
 		fields = []
 		values_to_save = []
@@ -62,14 +61,15 @@ class Event():
 			self.db.commit()
 			saved_id = cursor.lastrowid
 
-		# if 'Tag' in data and data['Tag']:
-		# 	self.db.execute('DELETE FROM event_tag WHERE event_id = ?', str(values['id']))
-		# 	tag_values = []
-		# 	# create a list of values to pass to
-		# 	for tag in event.Tag:
-		# 		tag_values.append('(' + saved_id + ', ' + tag + ')')
-		#
-		# 	self.db.execute('INSERT INTO event_tag (event_id, tag_id) VALUES ' + ', '.join(tag_values))
+		if 'Tags' in data and data['Tags']:
+			# delete current connections
+			self.db.execute('DELETE FROM event_tag WHERE event_id = ?', [saved_id])
+			tag_values = []
+			# create a list of values to pass to
+			for tag in data['Tags']:
+				tag_values.append('(' + str(saved_id) + ', ' + str(tag) + ')')
+			self.db.execute('INSERT INTO event_tag (event_id, tag_id) VALUES ' + ', '.join(tag_values))
+			self.db.commit()
 		return saved_id
 
 	def delete(self, event_id):
@@ -97,12 +97,14 @@ def event_update():
 		if value.has_key('name'):
 			data['Event'][value['name']] = value['value']
 		if value.has_key('tags'):
-			data['Tags'] = value
+			data['Tags'] = []
+			for tag in value['tags']:
+				data['Tags'].append(tag['id'])
 
 	event = Event()
 	event.save(data)
 
-	return 'all good!'
+	return event.save(data)
 
 @app.route("/events/add/", methods=['GET', 'POST'])
 def event_add():
@@ -110,12 +112,12 @@ def event_add():
 		data = {'Event' : {}, 'Tags' : []}
 		for field in request.json:
 			if 'tags' in field:
-				data['Tags'].append(field)
+				for tag in field['tags']:
+					data['Tags'].append(tag['Tag']['id'])
 			else:
 				data['Event'][field['name']] = field['value']
 		event = Event()
 		event_id = event.save(data)
-		print event_id
 		return jsonify(data)
 	else:
 		return render_template('add.html')

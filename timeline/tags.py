@@ -25,7 +25,6 @@ class Tag():
 		tags = self.db.execute('SELECT id FROM tag')
 		results = {'Tags' : []}
 		for tag in tags.fetchall():
-			print self.get(tag[0])
 			results['Tags'].append(self.get(tag[0], recursive))
 		return results
 

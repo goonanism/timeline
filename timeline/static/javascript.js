@@ -37,13 +37,13 @@
 		// tag auto complete
 		$.get('/tags/', function(data){
 			var tags = new Array()
-			for(var i = 0; data.tags.length > i; i++){
-				tags.push({index : i, label : data.tags[i].name, value : data.tags[i].id})
+			for(var i = 0; data.Tags.length > i; i++){
+				tags.push({index : i, label : data.Tags[i]['Tag']['name'], value : data.Tags[i]['Tag']['id']})
 			}
 			$('.tag-autocomplete').autocomplete({
 				source: tags,
 				select: function( event, ui ){
-					selected_tags.push(data.tags[ui.item.index]);
+					selected_tags.push(data.Tags[ui.item.index]);
 					updateSelectedTags(selected_tags);
 					$(this).val('');
 					return false;
