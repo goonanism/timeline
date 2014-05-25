@@ -17,7 +17,8 @@
 
 		$('.add_tag').click(function(e){
 			e.preventDefault()
-			tag_data = {tag : $('input[name=tag]').val()};
+			tag_data = {tag : $('.tag-autocomplete').val()};
+			console.log(tag_data);
 			$.ajax({
 				type: "POST",
 				contentType: "application/json; charset=utf-8",

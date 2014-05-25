@@ -29,12 +29,40 @@ class Tag():
 		return results
 
 	def save(self, data):
-		pass
+
+		fields = []
+		values_to_save = []
+		question_marks = []
+		saved_id = False
+
+		for field, value in data['Tag'].iteritems():
+			if field != 'id':
+				fields.append(field)
+				values_to_save.append(value)
+				question_marks.append('?')
+		if 'id' in data['Tag']: # ie if it's an update
+			saved_id = int(data['Tag']['id'])
+			values_to_save.append(saved_id)
+			set_fields = ' = ?, '.join(fields) + ' = ?'
+			self.db.execute('UPDATE tag SET ' + set_fields + ' WHERE id = ?', values_to_save)
+			self.db.commit()
+
+		else:
+			cursor = self.db.execute('INSERT INTO tag (' + ', '.join(fields) + ') VALUES( ' + ', '.join(question_marks) + ' )', values_to_save)
+			self.db.commit()
+			saved_id = cursor.lastrowid
+
+		return saved_id
+
+	def exists(self, reference):
+		cur = self.db.execute("SELECT * FROM tag WHERE reference = '" + reference + "'")
+		tag_exists = cur.fetchone();
+		if tag_exists:
+			return tag_exists
+		return False
+
 	def delete(self, tag_id):
 		pass
-
-
-
 
 @app.route("/tags/")
 def get_tags():
@@ -51,15 +79,18 @@ def get_tag(tag_id):
 @app.route("/tags/add/", methods=['GET', 'POST'])
 def add_tags():
 	if request.method == 'POST':
+
 		reference = request.json['tag'].replace(' ', '-').lower()
-		db = dbase.get_db()
 
-		# check if tag exists. If it does, return all details
+		tag = Tag()
+		exists = tag.exists(reference)
+		if exists:
+			return jsonify(exists)
 
-		cur = db.execute("SELECT * FROM tag WHERE reference = '" + reference + "'")
-		tag_exists = cur.fetchone();
-		if tag_exists:
-			return jsonify(tag_exists)
+		data = {'Tag' : {'name' : request.json['tag'], 'reference' : reference }}
+
+		tag.save(data)
+
 
 		# Otherwise create new tag
 		db.execute('insert into tag (name, reference) values(?, ?)', [request.json['tag'], reference])
