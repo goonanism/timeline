@@ -5,12 +5,14 @@ import os
 
 app = Flask(__name__)
 app.config.from_object(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(app.root_path, 'timeline.db')
 
-app.config.update(dict(
-	DATABASE=os.path.join(app.root_path, 'timeline.db'),
-	DEBUG=True
-))
-app.config.from_envvar('TIMELINE_SETTINGS', silent=True)
+
+# app.config.update(dict(
+# 	DATABASE=os.path.join(app.root_path, 'timeline.db'),
+# 	DEBUG=True
+# ))
+# app.config.from_envvar('TIMELINE_SETTINGS', silent=True)
 
 import timeline.events
 import timeline.tags
