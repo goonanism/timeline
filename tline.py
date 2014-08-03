@@ -57,8 +57,6 @@ def event_to_json(data):
 	d = data.__dict__
 	if d.has_key('_sa_instance_state'):
 		d.pop('_sa_instance_state')
-	if d.has_key('tags'):
-		tags = d.pop('tags')
 	d['date_from'] = str(d['date_from'])
 	d['date_to'] = str(d['date_to'])
 	return d
@@ -88,10 +86,7 @@ def events():
 	json = {'Events' : [], 'Tags' : []}
 	for row in events:
 		json['Events'].append(event_to_json(row))
-		# if row.tags:
-		# 	print row.tags
-			# for tag in row.tags:
-			# 	json['Tags'].append(tag_to_json(tag))
+		# get the tags here
 	return jsonify(json)
 
 @app.route("/events/view/<int:event_id>")
