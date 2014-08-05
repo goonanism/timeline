@@ -24,7 +24,7 @@ class Event(db.Model):
 	date_to = db.Column(db.Date())
 	milestone = db.Column(db.Boolean)
 
-	tags = db.relationship('Tag', secondary=event_tag,backref=db.backref('events', lazy='dynamic'))
+	tags = db.relationship('Tag', secondary=event_tag, backref=db.backref('events', lazy='dynamic'))
 
 	def __init__(self, name, note, link, date_from, date_to, milestone):
 		self.name = name
@@ -37,6 +37,31 @@ class Event(db.Model):
 	def __repr__(self):
 		return '<Event %r>' % self.name
 
+	def serialise(self):
+		return {
+			'id' : self.id,
+			'name' : self.name,
+			'note' : self.note,
+			'link' : self.link,
+			'date_from' : str(self.date_from),
+			'date_to' : str(self.date_to),
+			'milestone' : self.milestone,
+			'tags' : self.tags_for_events(self.tags)
+		}
+	def _serialise(self):
+		return {
+			'id' : self.id,
+			'name' : self.name,
+			'note' : self.note,
+			'link' : self.link,
+			'date_from' : str(self.date_from),
+			'date_to' : str(self.date_to),
+			'milestone' : self.milestone
+		}
+	def tags_for_events(self, tags):
+		return [tag._serialise() for tag in tags]
+
+
 class Tag(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	name = db.Column(db.String(255))
@@ -48,24 +73,21 @@ class Tag(db.Model):
 
 	def __repr__(self):
 		return '<Tag %r>' % self.name
-
-###########
-# Helpers #
-###########
-
-def event_to_json(data):
-	d = data.__dict__
-	if d.has_key('_sa_instance_state'):
-		d.pop('_sa_instance_state')
-	d['date_from'] = str(d['date_from'])
-	d['date_to'] = str(d['date_to'])
-	return d
-
-def tag_to_json(data):
-	d = data.__dict__
-	if d.has_key('_sa_instance_state'):
-		d.pop('_sa_instance_state')
-	return d
+	def serialise(self):
+		return {
+			'id' : self.id,
+			'name' : self.name,
+			'reference' : self.reference,
+			'events' : self.events_for_tags(self.events)
+		}
+	def _serialise(self):
+		return {
+			'id' : self.id,
+			'name' : self.name,
+			'reference' : self.reference
+		}
+	def events_for_tags(self, events):
+		return [event._serialise() for event in events]
 
 
 ################
@@ -83,11 +105,8 @@ def index():
 @app.route("/events/")
 def events():
 	events = Event.query.all()
-	json = {'Events' : [], 'Tags' : []}
-	for row in events:
-		json['Events'].append(event_to_json(row))
-		# get the tags here
-	return jsonify(json)
+	return jsonify(Events = [item.serialise() for item in events])
+	return 'events'
 
 @app.route("/events/view/<int:event_id>")
 def event_view(event_id):
@@ -114,10 +133,7 @@ def event_add():
 @app.route("/tags/")
 def get_tags():
 	tags = Tag.query.all()
-	json = {'Tags' : []}
-	for row in tags:
-		json['Tags'].append(tag_to_json(row))
-	return jsonify(json)
+	return jsonify(tags = [tag.serialise() for tag in tags])
 
 @app.route("/tags/view/<int:tag_id>")
 def get_tag(tag_id):
