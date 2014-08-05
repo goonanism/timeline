@@ -3,12 +3,30 @@
 from flask import Flask, request, render_template, jsonify, json
 from flask.ext.sqlalchemy import SQLAlchemy
 import os
+import datetime
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='')
 app.config.from_object(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(app.root_path, 'timeline.db')
 
 db = SQLAlchemy(app)
+
+def date_for_saving(json):
+	blank_event = {
+		'name' : None,
+		'note' : None,
+		'link' : None,
+		'date_from' : None,
+		'date_to' : None,
+		'milestone' : None
+	}
+	for event in json:
+		if event == 'date_from' or event == 'date_to':
+			date = json[event].split('-')
+			blank_event[event] = datetime.date(int(date[0]), int(date[1]), int(date[2]))
+		else:
+			blank_event[event] = json[event]
+	return blank_event
 
 event_tag = db.Table('event_tag',
 	db.Column('tag_id', db.Integer, db.ForeignKey('tag.id')),
@@ -96,7 +114,7 @@ class Tag(db.Model):
 
 @app.route("/")
 def index():
-	return 'timeline!'
+	return app.send_static_file('index.html')
 
 ######################
 # Start Event Routes #
@@ -115,12 +133,14 @@ def event_view(event_id):
 	else:
 		return jsonify([])
 
-@app.route("/events/edit/<int:event_id>")
-def even_edit(event_id):
-	return 'edit'
-
 @app.route("/events/edit/", methods=['POST'])
 def event_update():
+	data = date_for_saving(request.json)
+	new_ev = Event(	data['name'], data['note'], data['link'], data['date_from'], data['date_to'], data['milestone'] )
+
+	db.session.add(new_ev)
+	db.session.commit()
+
 	return 'update'
 
 @app.route("/events/add/", methods=['GET', 'POST'])
