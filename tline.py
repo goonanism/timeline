@@ -106,13 +106,14 @@ def index():
 def events():
 	events = Event.query.all()
 	return jsonify(Events = [item.serialise() for item in events])
-	return 'events'
 
 @app.route("/events/view/<int:event_id>")
 def event_view(event_id):
 	event = Event.query.filter_by(id=event_id).first()
-	json = event_to_json(event)
-	return jsonify(json)
+	if event:
+		return jsonify(event.serialise())
+	else:
+		return jsonify([])
 
 @app.route("/events/edit/<int:event_id>")
 def even_edit(event_id):
@@ -137,7 +138,11 @@ def get_tags():
 
 @app.route("/tags/view/<int:tag_id>")
 def get_tag(tag_id):
-	return 'tag'
+	tag = Tag.query.filter_by(id=tag_id).first()
+	if tag:
+		return jsonify(tag.serialise())
+	else:
+		return jsonify([])
 
 @app.route("/tags/add/", methods=['GET', 'POST'])
 def add_tags():
