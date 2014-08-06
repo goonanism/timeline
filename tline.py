@@ -11,23 +11,6 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(app.root_pat
 
 db = SQLAlchemy(app)
 
-def date_for_saving(json):
-	blank_event = {
-		'name' : None,
-		'note' : None,
-		'link' : None,
-		'date_from' : None,
-		'date_to' : None,
-		'milestone' : None
-	}
-	for event in json:
-		if event == 'date_from' or event == 'date_to':
-			date = json[event].split('-')
-			blank_event[event] = datetime.date(int(date[0]), int(date[1]), int(date[2]))
-		else:
-			blank_event[event] = json[event]
-	return blank_event
-
 event_tag = db.Table('event_tag',
 	db.Column('tag_id', db.Integer, db.ForeignKey('tag.id')),
 	db.Column('event_id', db.Integer, db.ForeignKey('event.id'))
@@ -135,13 +118,60 @@ def event_view(event_id):
 
 @app.route("/events/edit/", methods=['POST'])
 def event_update():
-	data = date_for_saving(request.json)
-	new_ev = Event(	data['name'], data['note'], data['link'], data['date_from'], data['date_to'], data['milestone'] )
+	'''
+	Create or update an event from json sent via POST. Returns error or event id
 
-	db.session.add(new_ev)
-	db.session.commit()
+	'''
+	if 'id' in request.json:
+		# If id is passed, update an existing record
+		event = Event.query.filter_by(id=request.json['id'])
+		if event.count() == 0:
+			return jsonify({ 'error' : 'No record with this id' })
 
-	return 'update'
+		event.update(request.json)
+		db.session.commit()
+		return jsonify({ 'success' : 'Successfully updated', 'id' : event.id })
+
+	else:
+		# check if record already exists based on name
+		event = Event.query.filter_by( name = request.json['name'].strip() )
+		if event.count() > 0:
+			return jsonify({ 'error' : "Event already exists"})
+
+		# otherwise, create a blank data set
+		event_data = {
+			'name' : None,
+			'note' : None,
+			'link' : None,
+			'date_from' : None,
+			'date_to' : None,
+			'milestone' : None
+		}
+
+		#fill in the vaules that we have
+		for event in request.json:
+			if event == 'date_from' or event == 'date_to':
+				# made date fields date objects
+				date = request.json[event].split('-')
+				event_data[event] = datetime.date(int(date[0]), int(date[1]), int(date[2]))
+			else:
+				event_data[event] = request.json[event]
+
+		# create a new event
+		new_event = Event(
+				event_data['name'],
+				event_data['note'],
+				event_data['link'],
+				event_data['date_from'],
+				event_data['date_to'],
+				event_data['milestone']
+			)
+
+		# save
+		db.session.add(new_event)
+		db.session.commit()
+
+		return jsonify({ 'success' : 'Successfully saved', 'id' : new_event.id })
 
 @app.route("/events/add/", methods=['GET', 'POST'])
 def event_add():
