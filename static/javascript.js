@@ -1,23 +1,24 @@
 (function($){
 	$(document).ready(function(){
 		// var json = {
-		// 		name : 'Really Great Fire of London',
+		// 		name : 'Another Great Fire of London',
 		// 		date_from : '1666-09-02',
 		// 		date_to :  '1666-09-05',
 		// 		link : 'http://en.wikipedia.org/wiki/Great_Fire_of_London'
 		// 	}
 
-		// var json = {
-		// 	id : 200,
-		// 	note : "This is a note"
-		// }
+		var json = {
+			id : 15,
+			note : "This is a note",
+			tags : [7, 8]
+		}
 
-		// $.ajax({
-		// 	type: 'POST',
-		// 	url: '/events/edit/',
-		// 	dataType: 'json',
-		// 	contentType: 'application/json',
-		// 	data: JSON.stringify(json)
-		// });
+		$.ajax({
+			type: 'POST',
+			url: '/events/edit/',
+			dataType: 'json',
+			contentType: 'application/json',
+			data: JSON.stringify(json)
+		});
 	});
 })(jQuery);

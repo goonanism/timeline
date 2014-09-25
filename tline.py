@@ -24,7 +24,6 @@ class Event(db.Model):
 	date_from = db.Column(db.Date())
 	date_to = db.Column(db.Date())
 	milestone = db.Column(db.Boolean)
-
 	tags = db.relationship('Tag', secondary=event_tag, backref=db.backref('events', lazy='dynamic'))
 
 	def __init__(self, name, note, link, date_from, date_to, milestone):
@@ -117,24 +116,39 @@ def event_view(event_id):
 		return jsonify([])
 
 @app.route("/events/edit/", methods=['POST'])
-def event_update():
+@app.route("/events/add/", methods=['GET', 'POST'])
+def event_update(data = None):
 	'''
 	Create or update an event from json sent via POST. Returns error or event id
 
 	'''
-	if 'id' in request.json:
+	if data == None:
+		data = request.json
+	else:
+		data = json.loads(data)
+
+	if 'id' in data:
 		# If id is passed, update an existing record
-		event = Event.query.filter_by(id=request.json['id'])
-		if event.count() == 0:
+		event = Event.query.get(data['id'])
+		tags = []
+		if not event:
 			return jsonify({ 'error' : 'No record with this id' })
 
-		event.update(request.json)
+		for key, value in data.iteritems():
+			if key == 'tags':
+				for tag in data[key]:
+					tags.append(Tag.query.get(tag))
+				setattr(event, 'tags', tags)
+
+			else:
+				setattr(event, key, value)
+
 		db.session.commit()
 		return jsonify({ 'success' : 'Successfully updated', 'id' : event.id })
 
 	else:
 		# check if record already exists based on name
-		event = Event.query.filter_by( name = request.json['name'].strip() )
+		event = Event.query.filter_by( name = data['name'].strip() )
 		if event.count() > 0:
 			return jsonify({ 'error' : "Event already exists"})
 
@@ -149,13 +163,13 @@ def event_update():
 		}
 
 		#fill in the vaules that we have
-		for event in request.json:
+		for event in data:
 			if event == 'date_from' or event == 'date_to':
 				# made date fields date objects
-				date = request.json[event].split('-')
+				date = data[event].split('-')
 				event_data[event] = datetime.date(int(date[0]), int(date[1]), int(date[2]))
 			else:
-				event_data[event] = request.json[event]
+				event_data[event] = data[event]
 
 		# create a new event
 		new_event = Event(
@@ -167,15 +181,17 @@ def event_update():
 				event_data['milestone']
 			)
 
+		if event_data['tags']:
+			tags = []
+			for tag in event_data['tags']:
+				tags.append(Tag.query.get(tag))
+			setattr(new_event, 'tags', tags)
+
 		# save
 		db.session.add(new_event)
 		db.session.commit()
 
 		return jsonify({ 'success' : 'Successfully saved', 'id' : new_event.id })
-
-@app.route("/events/add/", methods=['GET', 'POST'])
-def event_add():
-	return 'add'
 
 ##############
 # Tag Routes #

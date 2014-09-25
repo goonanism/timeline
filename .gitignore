@@ -1,2 +1,4 @@
 *.pyc
 .DS_Store
+timeline.db
+test.py
