@@ -89,6 +89,13 @@ class Tag(db.Model):
 	def events_for_tags(self, events):
 		return [event._serialise() for event in events]
 
+###########
+# Helpers #
+###########
+
+def get_reference_from_name(name):
+	name = name.replace(' ', '-').replace('&', 'and').replace('(', '').replace(')', '')
+	return name.lower()
 
 ################
 # Start Routes #
@@ -211,8 +218,31 @@ def get_tag(tag_id):
 		return jsonify([])
 
 @app.route("/tags/add/", methods=['GET', 'POST'])
-def add_tags():
-	return 'add tag'
+def add_tags(data = None):
+	'''
+	Create a Tag from json sent via POST or data. Returns Tag JSON or error
+
+	'''
+	if data == None:
+		data = request.json
+	else:
+		data = json.loads(data)
+
+	# get tag reference
+	reference = get_reference_from_name(data['name'])
+
+	# check if tag exists
+	tag_exists = Tag.query.filter_by(reference=reference).first()
+	if tag_exists: # if it exists return error
+		return jsonify({ 'error' : "Tag already exists", 'tag' : tag_exists.serialise() })
+
+	# create and save new tag
+	tag = Tag(data['name'], reference)
+	db.session.add(tag)
+	db.session.commit()
+
+	#return new tag as JSON
+	return jsonify(tag.serialise())
 
 ####################
 # GOOOOOOOO Flask! #

@@ -7,5 +7,5 @@ It's an experiement, we'll see what happens.
 To Do
 =====
 * Learn Angular
-* Add Tags
+* Check to make sure it's an ajax call
 * Delete Actions

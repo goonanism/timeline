@@ -1,11 +1,18 @@
-<html>
+<html ng-app="timeline">
 <head>
 	<title>Timeline</title>
-	<script type="text/javascript" src="jquery.js"></script>
-	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.21/angular.min.js"></script>
-	<script type="text/javascript" src="javascript.js"></script>
 </head>
 <body>
-	<h1>Timeline</h1>
+	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.21/angular.min.js"></script>
+	<script type="text/javascript" src="app.js"></script>
+	<ul ng-controller="TagsController as tagsCtrl">
+		<li ng-repeat="tag in tag_list">
+			<h3>{{tag.name}}</h3>
+			<ul>
+				<li ng-repeat="event in tag.events">
+					{{event.name}}
+				</li>
+		</li>
+	</ul>
 </body>
 </html>
